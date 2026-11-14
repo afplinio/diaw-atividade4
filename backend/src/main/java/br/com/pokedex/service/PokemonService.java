@@ -1,15 +1,20 @@
 package br.com.pokedex.service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.pokedex.exception.DuplicateResourceException;
+import br.com.pokedex.exception.InvalidPokemonException;
 import br.com.pokedex.exception.ResourceNotFoundException;
 import br.com.pokedex.model.Pokemon;
+import br.com.pokedex.model.PokemonType;
 import br.com.pokedex.model.Trainer;
 import br.com.pokedex.repository.PokemonRepository;
+import br.com.pokedex.repository.PokemonTypeRepository;
 import br.com.pokedex.repository.TrainerRepository;
 
 /** Regras de negócio dos Pokémon. O controller só recebe a requisição e delega para cá. */
@@ -19,10 +24,13 @@ public class PokemonService {
 	private static final Sort BY_ID = Sort.by("id");
 
 	private final PokemonRepository pokemonRepository;
+	private final PokemonTypeRepository typeRepository;
 	private final TrainerRepository trainerRepository;
 
-	public PokemonService(PokemonRepository pokemonRepository, TrainerRepository trainerRepository) {
+	public PokemonService(PokemonRepository pokemonRepository, PokemonTypeRepository typeRepository,
+			TrainerRepository trainerRepository) {
 		this.pokemonRepository = pokemonRepository;
+		this.typeRepository = typeRepository;
 		this.trainerRepository = trainerRepository;
 	}
 
@@ -66,9 +74,18 @@ public class PokemonService {
 		return pokemonRepository.findTopByOrderByIdDesc().map(pokemon -> pokemon.getId() + 1).orElse(1);
 	}
 
+	/** Limpa espaços, remove tipos repetidos e confere se os tipos existem na coleção "types". */
 	private Pokemon normalize(Pokemon pokemon) {
 		pokemon.setName(pokemon.getName() == null ? null : pokemon.getName().trim());
 		pokemon.setTypes(pokemon.getTypes().stream().map(String::trim).distinct().toList());
+
+		Set<String> validTypes = typeRepository.findAll().stream()
+				.map(PokemonType::getName)
+				.collect(Collectors.toSet());
+		List<String> unknown = pokemon.getTypes().stream().filter(type -> !validTypes.contains(type)).toList();
+		if (!unknown.isEmpty()) {
+			throw new InvalidPokemonException("Tipo(s) inexistente(s): " + String.join(", ", unknown) + ".");
+		}
 		return pokemon;
 	}
 

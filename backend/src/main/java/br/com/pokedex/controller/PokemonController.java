@@ -3,6 +3,8 @@ package br.com.pokedex.controller;
 import java.net.URI;
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +42,14 @@ public class PokemonController {
 
 	/** POST /api/pokemons - cadastra um Pokémon (201 Created). */
 	@PostMapping
-	public ResponseEntity<Pokemon> create(@RequestBody Pokemon pokemon) {
+	public ResponseEntity<Pokemon> create(@Valid @RequestBody Pokemon pokemon) {
 		Pokemon created = pokemonService.create(pokemon);
 		return ResponseEntity.created(URI.create("/api/pokemons/" + created.getId())).body(created);
 	}
 
 	/** PUT /api/pokemons/{id} - atualiza um Pokémon. */
 	@PutMapping("/{id}")
-	public Pokemon update(@PathVariable Integer id, @RequestBody Pokemon pokemon) {
+	public Pokemon update(@PathVariable Integer id, @Valid @RequestBody Pokemon pokemon) {
 		return pokemonService.update(id, pokemon);
 	}
 

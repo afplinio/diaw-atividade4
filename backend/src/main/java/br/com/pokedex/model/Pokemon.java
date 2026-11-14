@@ -3,6 +3,12 @@ package br.com.pokedex.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,23 +21,46 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Pokemon {
 
 	@Id
+	@Min(value = 1, message = "O número deve ser maior que zero.")
+	@Max(value = 9999, message = "O número deve ser no máximo 9999.")
 	private Integer id;
 
+	@NotBlank(message = "O nome é obrigatório.")
+	@Size(max = 30, message = "O nome deve ter no máximo 30 caracteres.")
 	private String name;
 
+	@NotNull(message = "O campo HP é obrigatório.")
+	@Min(value = 1, message = "O campo HP deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo HP deve ser no máximo 255.")
 	private Integer hp;
 
+	@NotNull(message = "O campo Ataque é obrigatório.")
+	@Min(value = 1, message = "O campo Ataque deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo Ataque deve ser no máximo 255.")
 	private Integer attack;
 
+	@NotNull(message = "O campo Defesa é obrigatório.")
+	@Min(value = 1, message = "O campo Defesa deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo Defesa deve ser no máximo 255.")
 	private Integer defense;
 
+	@NotNull(message = "O campo Ataque Especial é obrigatório.")
+	@Min(value = 1, message = "O campo Ataque Especial deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo Ataque Especial deve ser no máximo 255.")
 	private Integer specialAttack;
 
+	@NotNull(message = "O campo Defesa Especial é obrigatório.")
+	@Min(value = 1, message = "O campo Defesa Especial deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo Defesa Especial deve ser no máximo 255.")
 	private Integer specialDefense;
 
+	@NotNull(message = "O campo Velocidade é obrigatório.")
+	@Min(value = 1, message = "O campo Velocidade deve ser no mínimo 1.")
+	@Max(value = 255, message = "O campo Velocidade deve ser no máximo 255.")
 	private Integer speed;
 
-	private List<String> types = new ArrayList<>();
+	@Size(max = 2, message = "Um Pokémon pode ter no máximo 2 tipos.")
+	private List<@NotBlank(message = "O tipo não pode ser vazio.") String> types = new ArrayList<>();
 
 	public Pokemon() {
 	}
