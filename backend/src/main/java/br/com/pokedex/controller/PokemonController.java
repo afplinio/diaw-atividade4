@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.pokedex.model.Pokemon;
@@ -28,10 +29,14 @@ public class PokemonController {
 		this.pokemonService = pokemonService;
 	}
 
-	/** GET /api/pokemons - lista todos os Pokémon. */
+	/**
+	 * GET /api/pokemons - lista todos os Pokémon.
+	 * Filtros opcionais: /api/pokemons?name=pika e/ou /api/pokemons?type=Electric
+	 */
 	@GetMapping
-	public List<Pokemon> findAll() {
-		return pokemonService.findAll();
+	public List<Pokemon> findAll(@RequestParam(required = false) String name,
+			@RequestParam(required = false) String type) {
+		return pokemonService.search(name, type);
 	}
 
 	/** GET /api/pokemons/{id} - busca um Pokémon pelo ID. */

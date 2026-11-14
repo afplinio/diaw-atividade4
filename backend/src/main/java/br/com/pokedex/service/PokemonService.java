@@ -1,10 +1,15 @@
 package br.com.pokedex.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import br.com.pokedex.exception.DuplicateResourceException;
@@ -26,16 +31,39 @@ public class PokemonService {
 	private final PokemonRepository pokemonRepository;
 	private final PokemonTypeRepository typeRepository;
 	private final TrainerRepository trainerRepository;
+	private final MongoTemplate mongoTemplate;
 
 	public PokemonService(PokemonRepository pokemonRepository, PokemonTypeRepository typeRepository,
-			TrainerRepository trainerRepository) {
+			TrainerRepository trainerRepository, MongoTemplate mongoTemplate) {
 		this.pokemonRepository = pokemonRepository;
 		this.typeRepository = typeRepository;
 		this.trainerRepository = trainerRepository;
+		this.mongoTemplate = mongoTemplate;
 	}
 
 	public List<Pokemon> findAll() {
 		return pokemonRepository.findAll(BY_ID);
+	}
+
+	/**
+	 * Busca com filtros opcionais, combinados com "E":
+	 * name - parte do nome, sem diferenciar maiúsculas (ex.: "pika");
+	 * type - nome exato do tipo, sem diferenciar maiúsculas (ex.: "fire").
+	 */
+	public List<Pokemon> search(String name, String type) {
+		List<Criteria> filters = new ArrayList<>();
+		if (name != null && !name.isBlank()) {
+			filters.add(Criteria.where("name").regex(Pattern.quote(name.trim()), "i"));
+		}
+		if (type != null && !type.isBlank()) {
+			filters.add(Criteria.where("types").regex("^" + Pattern.quote(type.trim()) + "$", "i"));
+		}
+		if (filters.isEmpty()) {
+			return findAll();
+		}
+
+		Query query = new Query(new Criteria().andOperator(filters)).with(BY_ID);
+		return mongoTemplate.find(query, Pokemon.class);
 	}
 
 	public Pokemon findById(Integer id) {
