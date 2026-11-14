@@ -1,0 +1,13 @@
+# MongoDB local para desenvolvimento (alternativa ao MongoDB Atlas).
+# Uso: docker compose up -d
+services:
+  mongodb:
+    image: mongo:8.2
+    container_name: pokedex-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+
+volumes:
+  mongodb-data:
