@@ -1,0 +1,15 @@
+# Variáveis de ambiente (credenciais do MongoDB)
+.env
+.env.*
+!.env.example
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.iml
+
+# Logs
+*.log
