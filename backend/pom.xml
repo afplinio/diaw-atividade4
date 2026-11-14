@@ -48,6 +48,18 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<!-- O Script_Pokedex.sql fica na raiz do repositório e é copiado para o classpath no build. -->
+			<resource>
+				<directory>..</directory>
+				<includes>
+					<include>Script_Pokedex.sql</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
