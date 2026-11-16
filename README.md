@@ -21,8 +21,8 @@ Script_Pokedex.sql  →  MongoDB  →  Spring Boot REST API  →  React + Vite
 
 - 🗄️ **MongoDB** populado automaticamente a partir do `Script_Pokedex.sql`: 151 Pokémon, 18 tipos e 12 treinadores.
 - 🌐 **API REST** em Spring Boot com Controller, Service, Repository e Model.
-- 🔎 **Pesquisa** por nome ou número e **filtro por tipo**. São os mesmos da Atividade 03, mas agora usam os dados vindos da API.
-- 📄 **Detalhes** do Pokémon com barras de atributos e treinadores.
+- 🔎 **Pesquisa** por nome ou número e **filtro por tipo** feitos pela API (`GET /api/pokemons?name=&type=`). A pesquisa pelo número é feita no navegador, porque a API pesquisa só pelo nome.
+- 📄 **Detalhes** do Pokémon buscados na API (`GET /api/pokemons/{id}`), com barras de atributos e treinadores.
 - ➕ **Cadastro** de Pokémon por um formulário com validação. O número é opcional: sem ele, a API usa o próximo disponível.
 - ✏️ **Edição** pelo botão *Editar* no modal de detalhes.
 - 🗑️ **Exclusão** com caixa de confirmação. O Pokémon também sai do time dos treinadores, dos favoritos e da comparação.
@@ -252,7 +252,7 @@ diaw-atividade4/
     ├── .env.example
     └── src/
         ├── api/                   # client.js (fetch) e pokedexApi.js (endpoints)
-        ├── hooks/                 # usePokedexData, useToasts, useFavorites, useTheme
+        ├── hooks/                 # usePokedexData, usePokemonSearch, useToasts, useFavorites, useTheme
         ├── utils/                 # pokemonMapper.js (API ⇄ componentes), pokemon.js, sort.js
         ├── components/            # Componentes da Atividade 03 + PokemonForm, TypePicker,
         │                          # ConfirmDialog, LoadingState, ToastList
@@ -264,6 +264,8 @@ diaw-atividade4/
 | Antes (Atividade 03) | Agora (Atividade 04) |
 | --- | --- |
 | `import data from './data/pokedex-data.json'` | Hook `usePokedexData` busca `/api/pokemons`, `/api/types` e `/api/trainers` em paralelo |
+| Pesquisa e filtro no array local | Hook `usePokemonSearch` chama `/api/pokemons?name=&type=` (com espera enquanto o usuário digita) |
+| Detalhes vindos do JSON | Modal busca `/api/pokemons/{id}` ao abrir |
 | Dados fixos | Lista atualizada após `POST`, `PUT` e `DELETE` |
 | Sem carregamento | `LoadingState` e mensagem de erro com "Tentar novamente" |
 | — | `PokemonForm` (cadastro/edição), `ConfirmDialog` (exclusão) e notificações |
