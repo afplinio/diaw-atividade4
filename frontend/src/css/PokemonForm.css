@@ -107,6 +107,32 @@
   gap: 12px 16px;
 }
 
+.pokemon-form__meter {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.pokemon-form__meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.pokemon-form__total {
+  margin: 12px 0 0;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.pokemon-form__total strong {
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
 .pokemon-form__actions {
   display: flex;
   justify-content: flex-end;

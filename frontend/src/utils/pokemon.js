@@ -21,6 +21,15 @@ export const STATS = [
   { key: 'speed', label: 'Velocidade', short: 'SPD' },
 ]
 
+// Cor da barra de acordo com o valor do atributo (usada no StatBar e no formulário).
+export const getStatColor = (value) => {
+  if (value < 50) return '#f34444'
+  if (value < 80) return '#ff7f0f'
+  if (value < 100) return '#ffdd57'
+  if (value < 120) return '#a0e515'
+  return '#23cd5e'
+}
+
 export const getTotalStats = (stats) =>
   STATS.reduce((total, { key }) => total + stats[key], 0)
 

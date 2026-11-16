@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import Modal from './Modal'
 import TypePicker, { MAX_TYPES } from './TypePicker'
-import { MAX_STAT, STATS } from '../utils/pokemon'
+import { getStatColor, MAX_STAT, STATS } from '../utils/pokemon'
 import '../css/PokemonForm.css'
 
 const MAX_NAME = 30
@@ -19,6 +19,8 @@ const toFormState = (pokemon) => ({
 })
 
 const isInteger = (value) => /^\d+$/.test(String(value).trim())
+
+const previewValue = (value) => (isInteger(value) ? Math.min(Number(value), MAX_STAT) : 0)
 
 export const validatePokemonForm = (form, isEditing) => {
   const errors = {}
@@ -95,6 +97,8 @@ function PokemonForm({
         {errors[field]}
       </span>
     )
+
+  const total = STATS.reduce((sum, { key }) => sum + previewValue(form.stats[key]), 0)
 
   const describedBy = (field) => (errors[field] ? `${formId}-${field}-error` : undefined)
 
@@ -176,10 +180,22 @@ function PokemonForm({
                   aria-invalid={Boolean(errors[key])}
                   aria-describedby={describedBy(key)}
                 />
+                <span className="pokemon-form__meter" aria-hidden="true">
+                  <span
+                    className="pokemon-form__meter-fill"
+                    style={{
+                      width: `${(previewValue(form.stats[key]) / MAX_STAT) * 100}%`,
+                      background: getStatColor(previewValue(form.stats[key])),
+                    }}
+                  />
+                </span>
                 {fieldError(key)}
               </label>
             ))}
           </div>
+          <p className="pokemon-form__total">
+            Total <strong>{total}</strong>
+          </p>
         </fieldset>
 
         <div className="pokemon-form__actions">
