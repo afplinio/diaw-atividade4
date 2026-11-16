@@ -1,0 +1,334 @@
+{
+  "info": {
+    "name": "Pokédex API - Spring Boot + MongoDB",
+    "description": "Requisições da API REST da Atividade 04. Ajuste a variável baseUrl se a API não estiver em http://localhost:8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Pokémon",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ]
+            },
+            "description": "Lista todos os Pokémon ordenados pelo número."
+          }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons/25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons",
+                "25"
+              ]
+            },
+            "description": "Busca um Pokémon pelo ID. Retorna 404 se não existir."
+          }
+        },
+        {
+          "name": "Buscar por nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons?name=char",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "char"
+                }
+              ]
+            },
+            "description": "Parte do nome, sem diferenciar maiúsculas."
+          }
+        },
+        {
+          "name": "Buscar por tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons?type=Fire",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "Fire"
+                }
+              ]
+            },
+            "description": "Nome do tipo em inglês (Fire, Water, Grass...)."
+          }
+        },
+        {
+          "name": "Buscar por nome e tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons?name=nido&type=Poison",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "nido"
+                },
+                {
+                  "key": "type",
+                  "value": "Poison"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ]
+            },
+            "description": "Cadastra um Pokémon (201 Created). O campo id é opcional: sem ele, a API usa o próximo número.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 152,\n  \"name\": \"Chikorita\",\n  \"hp\": 45,\n  \"attack\": 49,\n  \"defense\": 65,\n  \"specialAttack\": 49,\n  \"specialDefense\": 65,\n  \"speed\": 45,\n  \"types\": [\n    \"Grass\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cadastrar com dados inválidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons"
+              ]
+            },
+            "description": "Exemplo de erro 400 com a mensagem de cada campo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"hp\": 300,\n  \"types\": [\n    \"Fire\",\n    \"Water\",\n    \"Grass\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons/152",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons",
+                "152"
+              ]
+            },
+            "description": "Atualiza todos os dados do Pokémon.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chikorita\",\n  \"hp\": 50,\n  \"attack\": 49,\n  \"defense\": 65,\n  \"specialAttack\": 49,\n  \"specialDefense\": 65,\n  \"speed\": 50,\n  \"types\": [\n    \"Grass\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pokemons/152",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pokemons",
+                "152"
+              ]
+            },
+            "description": "Remove o Pokémon (204 No Content) e o tira do time dos treinadores."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tipos",
+      "item": [
+        {
+          "name": "Listar tipos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "types"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Treinadores",
+      "item": [
+        {
+          "name": "Listar treinadores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trainers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "trainers"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar treinador por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trainers/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "trainers",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Time do treinador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trainers/1/pokemons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "trainers",
+                "1",
+                "pokemons"
+              ]
+            },
+            "description": "Pokémon do time do treinador (relação treinador -> Pokémon)."
+          }
+        }
+      ]
+    }
+  ]
+}

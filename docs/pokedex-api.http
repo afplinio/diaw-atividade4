@@ -1,0 +1,54 @@
+### Requisições da API para a extensão REST Client (VS Code) ou o cliente HTTP do IntelliJ.
+@baseUrl = http://localhost:8080/api
+
+### Listar todos os Pokémon
+GET {{baseUrl}}/pokemons
+
+### Buscar por ID
+GET {{baseUrl}}/pokemons/25
+
+### Buscar por nome e/ou tipo
+GET {{baseUrl}}/pokemons?name=nido&type=Poison
+
+### Cadastrar (o id é opcional)
+POST {{baseUrl}}/pokemons
+Content-Type: application/json
+
+{
+  "id": 152,
+  "name": "Chikorita",
+  "hp": 45,
+  "attack": 49,
+  "defense": 65,
+  "specialAttack": 49,
+  "specialDefense": 65,
+  "speed": 45,
+  "types": ["Grass"]
+}
+
+### Atualizar
+PUT {{baseUrl}}/pokemons/152
+Content-Type: application/json
+
+{
+  "name": "Chikorita",
+  "hp": 50,
+  "attack": 49,
+  "defense": 65,
+  "specialAttack": 49,
+  "specialDefense": 65,
+  "speed": 50,
+  "types": ["Grass"]
+}
+
+### Excluir
+DELETE {{baseUrl}}/pokemons/152
+
+### Listar tipos
+GET {{baseUrl}}/types
+
+### Listar treinadores
+GET {{baseUrl}}/trainers
+
+### Time de um treinador
+GET {{baseUrl}}/trainers/1/pokemons
