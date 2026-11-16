@@ -34,7 +34,7 @@ function App() {
   const [sortBy, setSortBy] = useState('id-asc')
   const [compareIds, setCompareIds] = useState([])
   const [showCompare, setShowCompare] = useState(false)
-  const { favorites, toggleFavorite } = useFavorites()
+  const { favorites, toggleFavorite, removeFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
   const { toasts, showToast, dismissToast } = useToasts()
   const { pokemonList, setPokemonList, types, trainers, setTrainers, status, error, reload } =
@@ -117,7 +117,8 @@ function App() {
 
   const closeCompare = useCallback(() => setShowCompare(false), [])
 
-  const comparePokemon = compareIds.map((id) => pokemonById.get(id))
+  const comparePokemon = compareIds.map((id) => pokemonById.get(id)).filter(Boolean)
+  const favoriteCount = favorites.filter((id) => pokemonById.has(id)).length
 
   const typeOptions = useMemo(() => types.filter((type) => type.name !== 'Typeless'), [types])
 
@@ -174,6 +175,8 @@ function App() {
           pokemonIds: trainer.pokemonIds.filter((pokemonId) => pokemonId !== id),
         })),
       )
+      removeFavorite(id)
+      setCompareIds((current) => current.filter((compareId) => compareId !== id))
       setPendingDelete(null)
       setSelectedId(null)
       showToast(`${name} foi excluído.`)
@@ -187,7 +190,7 @@ function App() {
   const cancelDelete = useCallback(() => setPendingDelete(null), [])
 
   return (
-    <div className={`app ${compareIds.length > 0 ? 'app--with-tray' : ''}`}>
+    <div className={`app ${comparePokemon.length > 0 ? 'app--with-tray' : ''}`}>
       <Header
         total={pokemonList.length}
         view={view}
@@ -228,7 +231,7 @@ function App() {
                     onClick={() => setOnlyFavorites((current) => !current)}
                     aria-pressed={onlyFavorites}
                   >
-                    ♥ Favoritos ({favorites.length})
+                    ♥ Favoritos ({favoriteCount})
                   </button>
                   <RandomButton onClick={showRandom} />
                   <button type="button" className="button toolbar__new" onClick={openCreateForm}>
@@ -267,7 +270,7 @@ function App() {
               <EmptyState
                 title="Nenhum Pokémon encontrado"
                 message={
-                  onlyFavorites && favorites.length === 0
+                  onlyFavorites && favoriteCount === 0
                     ? 'Você ainda não tem favoritos. Toque no coração de um Pokémon para favoritá-lo.'
                     : 'Tente pesquisar por outro nome ou ID, ou escolha outro tipo.'
                 }
@@ -285,7 +288,7 @@ function App() {
 
       <ToastList toasts={toasts} onDismiss={dismissToast} />
 
-      {compareIds.length > 0 && (
+      {comparePokemon.length > 0 && (
         <CompareTray
           selected={comparePokemon}
           onRemove={toggleCompare}
