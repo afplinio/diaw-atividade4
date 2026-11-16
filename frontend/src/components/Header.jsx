@@ -14,7 +14,9 @@ function Header({ total, view, onChangeView, theme, onToggleTheme }) {
           <span className="header__pokeball" aria-hidden="true" />
           <div>
             <h1 className="header__title">Pokédex</h1>
-            <p className="header__subtitle">{total} Pokémon da região de Kanto</p>
+            <p className="header__subtitle">
+              {total} {total === 1 ? 'Pokémon cadastrado' : 'Pokémon cadastrados'} no MongoDB
+            </p>
           </div>
         </div>
 

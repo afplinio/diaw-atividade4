@@ -4,7 +4,8 @@ function Footer() {
   return (
     <footer className="footer">
       <p>
-        Pokédex desenvolvida com React + Vite · Imagens:{' '}
+        Pokédex desenvolvida com React + Vite, Spring Boot e MongoDB · Dados:{' '}
+        <code>Script_Pokedex.sql</code> · Imagens:{' '}
         <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">
           PokéAPI
         </a>
