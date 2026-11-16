@@ -13,10 +13,11 @@ import EmptyState from './components/EmptyState'
 import LoadingState from './components/LoadingState'
 import Footer from './components/Footer'
 import PokemonForm from './components/PokemonForm'
+import ConfirmDialog from './components/ConfirmDialog'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
 import { useTheme } from './hooks/useTheme'
-import { createPokemon, updatePokemon } from './api/pokedexApi'
+import { createPokemon, deletePokemon, updatePokemon } from './api/pokedexApi'
 import { buildTypeIndex, fromApiPokemon, toApiPokemon } from './utils/pokemonMapper'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
 import { sortPokemon } from './utils/sort'
@@ -33,12 +34,16 @@ function App() {
   const [showCompare, setShowCompare] = useState(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
-  const { pokemonList, setPokemonList, types, trainers, status, error, reload } =
+  const { pokemonList, setPokemonList, types, trainers, setTrainers, status, error, reload } =
     usePokedexData()
 
   const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
 
   // Tipos presentes em pelo menos um Pokémon (o filtro só mostra estes).
   const availableTypes = useMemo(() => getUsedTypes(types, pokemonList), [types, pokemonList])
@@ -151,6 +156,35 @@ function App() {
       setSaving(false)
     }
   }
+
+  const requestDelete = useCallback((pokemon) => {
+    setDeleteError(null)
+    setPendingDelete(pokemon)
+  }, [])
+
+  const confirmDelete = async () => {
+    const { id } = pendingDelete
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deletePokemon(id)
+      setPokemonList((current) => current.filter((pokemon) => pokemon.id !== id))
+      setTrainers((current) =>
+        current.map((trainer) => ({
+          ...trainer,
+          pokemonIds: trainer.pokemonIds.filter((pokemonId) => pokemonId !== id),
+        })),
+      )
+      setPendingDelete(null)
+      setSelectedId(null)
+    } catch (requestError) {
+      setDeleteError(requestError)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const cancelDelete = useCallback(() => setPendingDelete(null), [])
 
   return (
     <div className={`app ${compareIds.length > 0 ? 'app--with-tray' : ''}`}>
@@ -277,13 +311,28 @@ function App() {
         />
       )}
 
-      {selectedPokemon && !form && (
+      {pendingDelete && (
+        <ConfirmDialog
+          title={`Excluir ${pendingDelete.name}?`}
+          message={
+            deleteError?.message ??
+            'O Pokémon será removido do MongoDB e do time dos treinadores. Esta ação não pode ser desfeita.'
+          }
+          confirmLabel="Excluir"
+          busy={deleting}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
+
+      {selectedPokemon && !form && !pendingDelete && (
         <PokemonDetails
           pokemon={selectedPokemon}
           owners={getOwners(trainers, selectedPokemon.id)}
           isFavorite={favorites.includes(selectedPokemon.id)}
           onToggleFavorite={toggleFavorite}
           onEdit={openEditForm}
+          onDelete={requestDelete}
           onClose={closeDetails}
           onPrevious={showPrevious}
           onNext={showNext}

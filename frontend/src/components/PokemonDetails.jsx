@@ -13,6 +13,7 @@ function PokemonDetails({
   isFavorite,
   onToggleFavorite,
   onEdit,
+  onDelete,
   onClose,
   onPrevious,
   onNext,
@@ -93,6 +94,13 @@ function PokemonDetails({
         <div className="details__actions">
           <button type="button" className="button button--ghost" onClick={() => onEdit(pokemon)}>
             ✏️ Editar
+          </button>
+          <button
+            type="button"
+            className="button button--ghost details__delete"
+            onClick={() => onDelete(pokemon)}
+          >
+            🗑️ Excluir
           </button>
         </div>
 

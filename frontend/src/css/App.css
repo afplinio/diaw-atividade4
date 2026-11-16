@@ -159,6 +159,19 @@
   color: var(--color-primary);
 }
 
+.button--danger {
+  background: #d93025;
+  box-shadow: 0 4px 0 #a52119;
+}
+
+.button--danger:hover {
+  box-shadow: 0 6px 0 #a52119;
+}
+
+.button--danger:active {
+  box-shadow: 0 2px 0 #a52119;
+}
+
 .results-bar {
   display: flex;
   align-items: center;

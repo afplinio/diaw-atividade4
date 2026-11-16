@@ -134,6 +134,11 @@
   flex: 1;
 }
 
+.details__actions .details__delete:hover {
+  border-color: #d93025;
+  color: #d93025;
+}
+
 .details__nav {
   display: flex;
   justify-content: space-between;
