@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import TypeFilter from './components/TypeFilter'
@@ -20,7 +20,7 @@ import { usePokedexData } from './hooks/usePokedexData'
 import { isIdSearch, usePokemonSearch } from './hooks/usePokemonSearch'
 import { useTheme } from './hooks/useTheme'
 import { useToasts } from './hooks/useToasts'
-import { createPokemon, deletePokemon, updatePokemon } from './api/pokedexApi'
+import { createPokemon, deletePokemon, getPokemon, updatePokemon } from './api/pokedexApi'
 import { buildTypeIndex, fromApiPokemon, toApiPokemon } from './utils/pokemonMapper'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
 import { sortPokemon } from './utils/sort'
@@ -93,6 +93,33 @@ function App() {
   const selectedPokemon = selectedIndex >= 0 ? navigationList[selectedIndex] : null
 
   const closeDetails = useCallback(() => setSelectedId(null), [])
+
+  useEffect(() => {
+    if (selectedId === null) return undefined
+
+    const controller = new AbortController()
+    getPokemon(selectedId, { signal: controller.signal })
+      .then((document) => {
+        const fresh = fromApiPokemon(document, buildTypeIndex(types))
+        setPokemonList((current) => {
+          const index = current.findIndex((pokemon) => pokemon.id === fresh.id)
+          if (index < 0 || JSON.stringify(current[index]) === JSON.stringify(fresh)) return current
+          const next = [...current]
+          next[index] = fresh
+          return next
+        })
+      })
+      .catch((requestError) => {
+        if (requestError.name === 'AbortError') return
+        if (requestError.status === 404) {
+          setPokemonList((current) => current.filter((pokemon) => pokemon.id !== selectedId))
+          setSelectedId(null)
+          showToast(requestError.message, 'error')
+        }
+      })
+
+    return () => controller.abort()
+  }, [selectedId, types, setPokemonList, showToast])
 
   const showPrevious = useCallback(() => {
     const index = (selectedIndex - 1 + navigationList.length) % navigationList.length
