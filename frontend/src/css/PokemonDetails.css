@@ -124,6 +124,16 @@
   font-size: 0.9rem;
 }
 
+.details__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.details__actions .button {
+  flex: 1;
+}
+
 .details__nav {
   display: flex;
   justify-content: space-between;

@@ -16,7 +16,7 @@ import PokemonForm from './components/PokemonForm'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
 import { useTheme } from './hooks/useTheme'
-import { createPokemon } from './api/pokedexApi'
+import { createPokemon, updatePokemon } from './api/pokedexApi'
 import { buildTypeIndex, fromApiPokemon, toApiPokemon } from './utils/pokemonMapper'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
 import { sortPokemon } from './utils/sort'
@@ -119,16 +119,25 @@ function App() {
     setForm({ pokemon: null })
   }
 
+  const openEditForm = useCallback((pokemon) => {
+    setSaveError(null)
+    setForm({ pokemon })
+  }, [])
+
   const closeForm = useCallback(() => {
     setForm(null)
     setSaveError(null)
   }, [])
 
   const savePokemon = async (pokemon) => {
+    const editing = form.pokemon
     setSaving(true)
     setSaveError(null)
     try {
-      const response = await createPokemon(toApiPokemon(pokemon))
+      const body = toApiPokemon(pokemon)
+      const response = editing
+        ? await updatePokemon(editing.id, body)
+        : await createPokemon(body)
       const saved = fromApiPokemon(response, buildTypeIndex(types))
 
       setPokemonList((current) =>
@@ -274,6 +283,7 @@ function App() {
           owners={getOwners(trainers, selectedPokemon.id)}
           isFavorite={favorites.includes(selectedPokemon.id)}
           onToggleFavorite={toggleFavorite}
+          onEdit={openEditForm}
           onClose={closeDetails}
           onPrevious={showPrevious}
           onNext={showNext}

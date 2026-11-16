@@ -12,6 +12,7 @@ function PokemonDetails({
   owners,
   isFavorite,
   onToggleFavorite,
+  onEdit,
   onClose,
   onPrevious,
   onNext,
@@ -88,6 +89,12 @@ function PokemonDetails({
             <p className="details__empty">Nenhum treinador possui este Pokémon.</p>
           )}
         </section>
+
+        <div className="details__actions">
+          <button type="button" className="button button--ghost" onClick={() => onEdit(pokemon)}>
+            ✏️ Editar
+          </button>
+        </div>
 
         <nav className="details__nav" aria-label="Navegar entre Pokémon">
           <button type="button" className="button button--ghost" onClick={onPrevious}>
