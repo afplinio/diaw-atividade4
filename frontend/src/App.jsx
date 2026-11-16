@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from 'react'
-import data from './data/pokedex-data.json'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import TypeFilter from './components/TypeFilter'
@@ -13,16 +12,11 @@ import ComparePanel from './components/ComparePanel'
 import EmptyState from './components/EmptyState'
 import Footer from './components/Footer'
 import { useFavorites } from './hooks/useFavorites'
+import { usePokedexData } from './hooks/usePokedexData'
 import { useTheme } from './hooks/useTheme'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
 import { sortPokemon } from './utils/sort'
 import './css/App.css'
-
-// Tipos presentes no arquivo de dados (calculado uma única vez).
-const availableTypes = getUsedTypes(data.types, data.pokemon)
-
-// Mapa id -> Pokémon para buscas rápidas (usado nos treinadores).
-const pokemonById = new Map(data.pokemon.map((pokemon) => [pokemon.id, pokemon]))
 
 function App() {
   const [view, setView] = useState('pokedex')
@@ -35,17 +29,27 @@ function App() {
   const [showCompare, setShowCompare] = useState(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
+  const { pokemonList, types, trainers } = usePokedexData()
+
+  // Tipos presentes em pelo menos um Pokémon (o filtro só mostra estes).
+  const availableTypes = useMemo(() => getUsedTypes(types, pokemonList), [types, pokemonList])
+
+  // Mapa id -> Pokémon para buscas rápidas (usado nos treinadores e na comparação).
+  const pokemonById = useMemo(
+    () => new Map(pokemonList.map((pokemon) => [pokemon.id, pokemon])),
+    [pokemonList],
+  )
 
   // Estado derivado: a lista exibida é recalculada a cada digitação, filtro ou ordenação.
   const filteredPokemon = useMemo(() => {
-    const result = data.pokemon.filter(
+    const result = pokemonList.filter(
       (pokemon) =>
         matchesSearch(pokemon, search) &&
         matchesType(pokemon, selectedType) &&
         (!onlyFavorites || favorites.includes(pokemon.id)),
     )
     return sortPokemon(result, sortBy)
-  }, [search, selectedType, onlyFavorites, favorites, sortBy])
+  }, [pokemonList, search, selectedType, onlyFavorites, favorites, sortBy])
 
   const hasFilters = search !== '' || selectedType !== 'all' || onlyFavorites
 
@@ -58,7 +62,7 @@ function App() {
   // Navegação do modal: percorre a lista filtrada (ou a completa, se o Pokémon não estiver nela).
   const navigationList = filteredPokemon.some((pokemon) => pokemon.id === selectedId)
     ? filteredPokemon
-    : data.pokemon
+    : pokemonList
   const selectedIndex = navigationList.findIndex((pokemon) => pokemon.id === selectedId)
   const selectedPokemon = selectedIndex >= 0 ? navigationList[selectedIndex] : null
 
@@ -76,7 +80,8 @@ function App() {
 
   // Sorteia um Pokémon da lista atual (ou de todos, se a lista estiver vazia).
   const showRandom = () => {
-    const source = filteredPokemon.length > 0 ? filteredPokemon : data.pokemon
+    const source = filteredPokemon.length > 0 ? filteredPokemon : pokemonList
+    if (source.length === 0) return
     const randomPokemon = source[Math.floor(Math.random() * source.length)]
     setSelectedId(randomPokemon.id)
   }
@@ -101,7 +106,7 @@ function App() {
   return (
     <div className={`app ${compareIds.length > 0 ? 'app--with-tray' : ''}`}>
       <Header
-        total={data.pokemon.length}
+        total={pokemonList.length}
         view={view}
         onChangeView={setView}
         theme={theme}
@@ -111,7 +116,7 @@ function App() {
       <main className="app__content">
         {view === 'trainers' ? (
           <TrainerList
-            trainers={data.trainers}
+            trainers={trainers}
             pokemonById={pokemonById}
             onSelectPokemon={setSelectedId}
           />
@@ -142,7 +147,7 @@ function App() {
 
             <div className="results-bar">
               <p className="results-info" aria-live="polite">
-                Exibindo <strong>{filteredPokemon.length}</strong> de {data.pokemon.length} Pokémon
+                Exibindo <strong>{filteredPokemon.length}</strong> de {pokemonList.length} Pokémon
               </p>
               {hasFilters && (
                 <button type="button" className="button button--ghost" onClick={clearFilters}>
@@ -200,7 +205,7 @@ function App() {
       {selectedPokemon && (
         <PokemonDetails
           pokemon={selectedPokemon}
-          owners={getOwners(data.trainers, selectedPokemon.id)}
+          owners={getOwners(trainers, selectedPokemon.id)}
           isFavorite={favorites.includes(selectedPokemon.id)}
           onToggleFavorite={toggleFavorite}
           onClose={closeDetails}
