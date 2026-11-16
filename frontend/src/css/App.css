@@ -33,6 +33,11 @@
   color: var(--text);
 }
 
+.results-info__note {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
 .toolbar__row {
   display: flex;
   align-items: center;

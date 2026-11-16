@@ -17,6 +17,7 @@ import ConfirmDialog from './components/ConfirmDialog'
 import ToastList from './components/ToastList'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
+import { isIdSearch, usePokemonSearch } from './hooks/usePokemonSearch'
 import { useTheme } from './hooks/useTheme'
 import { useToasts } from './hooks/useToasts'
 import { createPokemon, deletePokemon, updatePokemon } from './api/pokedexApi'
@@ -56,16 +57,25 @@ function App() {
     [pokemonList],
   )
 
+  const {
+    ids: searchIds,
+    searching,
+    error: searchError,
+  } = usePokemonSearch(search, selectedType, pokemonList)
+
   // Estado derivado: a lista exibida é recalculada a cada digitação, filtro ou ordenação.
   const filteredPokemon = useMemo(() => {
     const result = pokemonList.filter(
       (pokemon) =>
-        matchesSearch(pokemon, search) &&
-        matchesType(pokemon, selectedType) &&
+        (searchIds
+          ? searchIds.has(pokemon.id)
+          : matchesSearch(pokemon, search) && matchesType(pokemon, selectedType)) &&
+        // A API pesquisa só pelo nome; a pesquisa pelo número ("25", "#025") é feita aqui.
+        (!isIdSearch(search) || matchesSearch(pokemon, search)) &&
         (!onlyFavorites || favorites.includes(pokemon.id)),
     )
     return sortPokemon(result, sortBy)
-  }, [pokemonList, search, selectedType, onlyFavorites, favorites, sortBy])
+  }, [pokemonList, searchIds, search, selectedType, onlyFavorites, favorites, sortBy])
 
   const hasFilters = search !== '' || selectedType !== 'all' || onlyFavorites
 
@@ -249,6 +259,13 @@ function App() {
             <div className="results-bar">
               <p className="results-info" aria-live="polite">
                 Exibindo <strong>{filteredPokemon.length}</strong> de {pokemonList.length} Pokémon
+                {searching && <span className="results-info__note"> · buscando na API...</span>}
+                {searchError && (
+                  <span className="results-info__note">
+                    {' '}
+                    · a busca na API falhou, filtrando no navegador
+                  </span>
+                )}
               </p>
               {hasFilters && (
                 <button type="button" className="button button--ghost" onClick={clearFilters}>
