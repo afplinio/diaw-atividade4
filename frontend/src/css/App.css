@@ -46,6 +46,11 @@
   flex-shrink: 0;
 }
 
+.toolbar__new {
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+
 .chip-button {
   padding: 12px 18px;
   border-radius: 999px;
@@ -110,7 +115,8 @@
     justify-content: center;
   }
 
-  .toolbar__actions > .sort-select {
+  .toolbar__actions > .sort-select,
+  .toolbar__actions > .toolbar__new {
     flex-basis: 100%;
   }
 }

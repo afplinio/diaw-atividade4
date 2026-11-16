@@ -12,9 +12,12 @@ import ComparePanel from './components/ComparePanel'
 import EmptyState from './components/EmptyState'
 import LoadingState from './components/LoadingState'
 import Footer from './components/Footer'
+import PokemonForm from './components/PokemonForm'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
 import { useTheme } from './hooks/useTheme'
+import { createPokemon } from './api/pokedexApi'
+import { buildTypeIndex, fromApiPokemon, toApiPokemon } from './utils/pokemonMapper'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
 import { sortPokemon } from './utils/sort'
 import './css/App.css'
@@ -30,7 +33,12 @@ function App() {
   const [showCompare, setShowCompare] = useState(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
-  const { pokemonList, types, trainers, status, error, reload } = usePokedexData()
+  const { pokemonList, setPokemonList, types, trainers, status, error, reload } =
+    usePokedexData()
+
+  const [form, setForm] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   // Tipos presentes em pelo menos um Pokémon (o filtro só mostra estes).
   const availableTypes = useMemo(() => getUsedTypes(types, pokemonList), [types, pokemonList])
@@ -104,6 +112,37 @@ function App() {
 
   const comparePokemon = compareIds.map((id) => pokemonById.get(id))
 
+  const typeOptions = useMemo(() => types.filter((type) => type.name !== 'Typeless'), [types])
+
+  const openCreateForm = () => {
+    setSaveError(null)
+    setForm({ pokemon: null })
+  }
+
+  const closeForm = useCallback(() => {
+    setForm(null)
+    setSaveError(null)
+  }, [])
+
+  const savePokemon = async (pokemon) => {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const response = await createPokemon(toApiPokemon(pokemon))
+      const saved = fromApiPokemon(response, buildTypeIndex(types))
+
+      setPokemonList((current) =>
+        [...current.filter((item) => item.id !== saved.id), saved].sort((a, b) => a.id - b.id),
+      )
+      setForm(null)
+      setSelectedId(saved.id)
+    } catch (requestError) {
+      setSaveError(requestError)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className={`app ${compareIds.length > 0 ? 'app--with-tray' : ''}`}>
       <Header
@@ -149,6 +188,9 @@ function App() {
                     ♥ Favoritos ({favorites.length})
                   </button>
                   <RandomButton onClick={showRandom} />
+                  <button type="button" className="button toolbar__new" onClick={openCreateForm}>
+                    + Novo Pokémon
+                  </button>
                 </div>
               </div>
               <TypeFilter
@@ -215,7 +257,18 @@ function App() {
         />
       )}
 
-      {selectedPokemon && (
+      {form && (
+        <PokemonForm
+          pokemon={form.pokemon}
+          typeOptions={typeOptions}
+          onSubmit={savePokemon}
+          onClose={closeForm}
+          saving={saving}
+          serverError={saveError}
+        />
+      )}
+
+      {selectedPokemon && !form && (
         <PokemonDetails
           pokemon={selectedPokemon}
           owners={getOwners(trainers, selectedPokemon.id)}
