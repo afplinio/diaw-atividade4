@@ -10,6 +10,7 @@ import TrainerList from './components/TrainerList'
 import CompareTray from './components/CompareTray'
 import ComparePanel from './components/ComparePanel'
 import EmptyState from './components/EmptyState'
+import LoadingState from './components/LoadingState'
 import Footer from './components/Footer'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
@@ -29,7 +30,7 @@ function App() {
   const [showCompare, setShowCompare] = useState(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
-  const { pokemonList, types, trainers } = usePokedexData()
+  const { pokemonList, types, trainers, status, error, reload } = usePokedexData()
 
   // Tipos presentes em pelo menos um Pokémon (o filtro só mostra estes).
   const availableTypes = useMemo(() => getUsedTypes(types, pokemonList), [types, pokemonList])
@@ -114,13 +115,25 @@ function App() {
       />
 
       <main className="app__content">
-        {view === 'trainers' ? (
+        {status === 'loading' && <LoadingState />}
+
+        {status === 'error' && (
+          <EmptyState title="Não foi possível carregar a Pokédex" message={error?.message}>
+            <button type="button" className="button" onClick={reload}>
+              Tentar novamente
+            </button>
+          </EmptyState>
+        )}
+
+        {status === 'ready' && view === 'trainers' && (
           <TrainerList
             trainers={trainers}
             pokemonById={pokemonById}
             onSelectPokemon={setSelectedId}
           />
-        ) : (
+        )}
+
+        {status === 'ready' && view === 'pokedex' && (
           <>
             <section className="toolbar">
               <div className="toolbar__row">
