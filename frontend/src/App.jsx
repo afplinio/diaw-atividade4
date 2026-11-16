@@ -14,9 +14,11 @@ import LoadingState from './components/LoadingState'
 import Footer from './components/Footer'
 import PokemonForm from './components/PokemonForm'
 import ConfirmDialog from './components/ConfirmDialog'
+import ToastList from './components/ToastList'
 import { useFavorites } from './hooks/useFavorites'
 import { usePokedexData } from './hooks/usePokedexData'
 import { useTheme } from './hooks/useTheme'
+import { useToasts } from './hooks/useToasts'
 import { createPokemon, deletePokemon, updatePokemon } from './api/pokedexApi'
 import { buildTypeIndex, fromApiPokemon, toApiPokemon } from './utils/pokemonMapper'
 import { getOwners, getUsedTypes, matchesSearch, matchesType } from './utils/pokemon'
@@ -34,6 +36,7 @@ function App() {
   const [showCompare, setShowCompare] = useState(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { theme, toggleTheme } = useTheme()
+  const { toasts, showToast, dismissToast } = useToasts()
   const { pokemonList, setPokemonList, types, trainers, setTrainers, status, error, reload } =
     usePokedexData()
 
@@ -43,7 +46,6 @@ function App() {
 
   const [pendingDelete, setPendingDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState(null)
 
   // Tipos presentes em pelo menos um Pokémon (o filtro só mostra estes).
   const availableTypes = useMemo(() => getUsedTypes(types, pokemonList), [types, pokemonList])
@@ -150,6 +152,9 @@ function App() {
       )
       setForm(null)
       setSelectedId(saved.id)
+      showToast(
+        editing ? `${saved.name} foi atualizado.` : `${saved.name} foi cadastrado com o número #${saved.id}.`,
+      )
     } catch (requestError) {
       setSaveError(requestError)
     } finally {
@@ -157,15 +162,9 @@ function App() {
     }
   }
 
-  const requestDelete = useCallback((pokemon) => {
-    setDeleteError(null)
-    setPendingDelete(pokemon)
-  }, [])
-
   const confirmDelete = async () => {
-    const { id } = pendingDelete
+    const { id, name } = pendingDelete
     setDeleting(true)
-    setDeleteError(null)
     try {
       await deletePokemon(id)
       setPokemonList((current) => current.filter((pokemon) => pokemon.id !== id))
@@ -177,8 +176,9 @@ function App() {
       )
       setPendingDelete(null)
       setSelectedId(null)
+      showToast(`${name} foi excluído.`)
     } catch (requestError) {
-      setDeleteError(requestError)
+      showToast(requestError.message, 'error')
     } finally {
       setDeleting(false)
     }
@@ -283,6 +283,8 @@ function App() {
 
       <Footer />
 
+      <ToastList toasts={toasts} onDismiss={dismissToast} />
+
       {compareIds.length > 0 && (
         <CompareTray
           selected={comparePokemon}
@@ -314,10 +316,7 @@ function App() {
       {pendingDelete && (
         <ConfirmDialog
           title={`Excluir ${pendingDelete.name}?`}
-          message={
-            deleteError?.message ??
-            'O Pokémon será removido do MongoDB e do time dos treinadores. Esta ação não pode ser desfeita.'
-          }
+          message="O Pokémon será removido do MongoDB e do time dos treinadores. Esta ação não pode ser desfeita."
           confirmLabel="Excluir"
           busy={deleting}
           onConfirm={confirmDelete}
@@ -332,7 +331,7 @@ function App() {
           isFavorite={favorites.includes(selectedPokemon.id)}
           onToggleFavorite={toggleFavorite}
           onEdit={openEditForm}
-          onDelete={requestDelete}
+          onDelete={setPendingDelete}
           onClose={closeDetails}
           onPrevious={showPrevious}
           onNext={showNext}
